@@ -87,17 +87,20 @@ export default function RestaurantDashboard() {
     const mRes = await api.get(`/restaurants/${restaurant.id}/menu`);
     setMenu(mRes.data);
   };
-
   const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      await api.put(`/orders/${orderId}/status`, { status: newStatus });
-      const oRes = await api.get("/orders/restaurant-orders");
-      setOrders(oRes.data);
-      setMessage("Order status updated ✅");
-    } catch (err) {
-      setMessage(err.response?.data?.detail || "Error updating status");
-    }
-  };
+  try {
+    console.log("Updating order", orderId, "to status", newStatus);
+    const res = await api.put(`/orders/${orderId}/status`, { status: newStatus });
+    console.log("Update response:", res.data);
+    setMessage(`Order #${orderId} updated to ${newStatus} ✅`);
+    const oRes = await api.get("/orders/restaurant-orders");
+    setOrders(oRes.data);
+  } catch (err) {
+    console.error("Error:", err.response?.data);
+    setMessage(err.response?.data?.detail || "Error updating status");
+  }
+};
+
 
   if (!restaurant) {
     return (
@@ -194,15 +197,22 @@ export default function RestaurantDashboard() {
                     Total: ${order.total_amount.toFixed(2)}
                   </span>
                   <select
-                    value={order.status}
-                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                    className="border rounded px-2 py-1 text-sm"
-                  >
-                    <option value={order.status}>{order.status}</option>
-                    {STATUS_OPTIONS.filter((s) => s !== order.status).map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
+  defaultValue={order.status}
+  onChange={(e) => {
+    const newStatus = e.target.value;
+    if (newStatus !== order.status) {
+      updateOrderStatus(order.id, newStatus);
+    }
+  }}
+  className="border rounded px-2 py-1 text-sm"
+>
+  <option value="pending">pending</option>
+  <option value="confirmed">confirmed</option>
+  <option value="preparing">preparing</option>
+  <option value="out_for_delivery">out_for_delivery</option>
+  <option value="delivered">delivered</option>
+  <option value="canceled">canceled</option>
+</select>
                 </div>
               </div>
             ))
