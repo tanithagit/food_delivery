@@ -1,0 +1,25 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.database import engine, Base
+import app.models
+from app.routers import auth, restaurant, cart
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="FoodDelivery")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth.router)
+app.include_router(restaurant.router)
+app.include_router(cart.router)
+
+@app.get("/")
+def root():
+    return {"message": "Food Delivery API is running"}
