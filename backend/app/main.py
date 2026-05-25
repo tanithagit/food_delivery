@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
 import app.models
-from app.routers import auth, restaurant, cart
+from app.routers import auth, restaurant, cart, order
 
 Base.metadata.create_all(bind=engine)
 
@@ -19,6 +19,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(restaurant.router)
 app.include_router(cart.router)
+app.include_router(order.router)
 
 @app.get("/")
 def root():
